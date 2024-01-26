@@ -313,6 +313,7 @@ func initRecycler[V *recyclable[T], T any](r Pooler[T]) (Recycler[T], error) {
 		r.Toss(xv) //Toss has a liveness check and can potentially not block
 	}
 	rp, err := CreatePool[*recyclable[T]](maker, AfterGetNoop[*recyclable[T]], bp, 0)
+	if err!=nil {
 		Destroy(rp)
 		return nil, err
 	}
