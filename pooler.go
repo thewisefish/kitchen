@@ -179,7 +179,7 @@ func (r *wrappedPool[T]) Put(x T) {
 	r.pool.Put(x)
 }
 
-// Sends a value back to the Pool through a channel if the pool is still live. Note that Toss() takes a pointer to T, meaning that if your pool is a pool of pointers *T, you will be passing a **T to Toss
+// Sends a value back to the Pool through a channel if the pool is still live. Note that Toss() takes a pointer to T.
 func (r *wrappedPool[T]) Toss(x *T) {
 	if r.live.Load() && x != nil { //check to avoid the situation where this causes a deadlock due to the Pooler being disabled, therefore no longer listening
 		if len(r.dump) < r.reference.Size {
@@ -211,7 +211,7 @@ func (r *wrappedPool[T]) manage(f func(), reset bool) {
 
 func (r *wrappedPool[T]) disable() {
 	r.manage(func() {
-		ok := r.live.Swap(false) //forces anything pending a load check eg .enabled() to go first -- one of many checks to prevent the situation where this struct is sent to a disabled pool, causing this call to block
+		ok := r.live.Swap(false) //forces anything pending a load check eg .enabled() to go first -- one of several check to prevent deadlock
 		if ok {
 			for i := 0; i < r.listeners; i++ {
 				r.finished <- struct{}{}
@@ -225,7 +225,7 @@ func (r *wrappedPool[T]) monitor() {
 	}
 }
 
-// Called on pool creation. Preloads the pool then waits on the channel for values to return to the pool. Returns when disable() is called
+// Called on pool creation. Waits on the channel for values to return to the pool. Returns when disable() is called
 func (r *wrappedPool[T]) clearDump() {
 	for {
 		select {
@@ -312,20 +312,19 @@ func initRecycler[V *recyclable[T], T any](r Pooler[T]) (Recycler[T], error) {
 		xv := x.val.Swap(nil)
 		r.Toss(xv) //Toss has a liveness check and can potentially not block
 	}
-	rp, err := CreatePool[*recyclable[T]](maker, AfterGetNoop[*recyclable[T]], bp, 0) //preload disabled to prevent a race condition between channel listeners running and the recycler redefining its own reference functions
-	if err != nil {
+	rp, err := CreatePool[*recyclable[T]](maker, AfterGetNoop[*recyclable[T]], bp, 0)
 		Destroy(rp)
 		return nil, err
 	}
 	//redefine afterGet logic to set .finish property on created recyclables
-	rp.source().reference.Lock()
+	//rp.source().reference.Lock() //nothing else contends with this lock
 	definer := func() *recyclable[T] {
 		x := maker()
 		x.finish = rp.Put
 		return x
 	}
 	rp.source().reference.New = definer
-	rp.source().reference.Unlock()
+	//rp.source().reference.Unlock()
 	rv := &recyclingPlant[*recyclable[T], T]{pool: r, wrapper: rp}
 	if !r.enabled() { //check last to minimize ABA problem shenanigans -- return recyclingPlant at this point since the recycler will get Destroy()'d anyway
 		err = recyclerDisabled.Error()
