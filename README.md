@@ -3,6 +3,7 @@
 A collection of convenience functions, structs, and interfaces that I wrote to simplify their implementation into existing codebases
 # Currently included
 * Pooler
+
   `stage: need to finish documentation, add benchmarks/example implementations to this package, test backwards compatibility`
   - Wrapper for typed instances of sync.Pool, since sync.Pool is not yet adapted for generics in the standard library.
   - Poolers handle the type assertion and object resetting issues native to sync.Pool on your behalf.
