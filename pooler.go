@@ -17,7 +17,7 @@ const (
 	nilPoolerToRecycler                    // nil Pooler passed to CreateRecycler
 	poolerDisabled                         // Pooler disabled
 	recyclerDisabled                       // Recycler disabled
-	initpoolerError                        // error creating Recycler``
+	initpoolerError                        // error creating Recycler
 )
 
 func (e poolerError) Error() error { return errors.New(e.String()) }
@@ -195,6 +195,7 @@ func (r *wrappedPool[T]) source() *wrappedPool[T] { return r }
 
 // defined to expose pool liveness to recycler New
 func (r *wrappedPool[T]) enabled() bool {
+	//if r==nil {return false}
 	ok := r.live.Load()
 	return ok
 }
@@ -264,6 +265,7 @@ type recyclingPlant[V Wrapped[T], T any] struct {
 }
 
 func (r *recyclingPlant[V, T]) Make() Wrapped[T] {
+//	if r.wrapper.enabled() {
 	if r.pool != nil && r.wrapper != nil {
 		wp := r.wrapper.Get()
 		if r.pool.enabled() {
