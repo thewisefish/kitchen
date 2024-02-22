@@ -21,9 +21,9 @@ const _poolerErrorCode_name = "nil Poolablenil New function passed to CreatePool
 
 var _poolerErrorCode_index = [...]uint8{0, 12, 51, 95, 130, 145, 162, 185}
 
-func (i poolerError) String() string {
-	if i < 0 || i >= poolerError(len(_poolerErrorCode_index)-1) {
-		return "poolerError(" + strconv.FormatInt(int64(i), 10) + ")"
+func (i poolerErrorCode) String() string {
+	if i < 0 || i >= poolerErrorCode(len(_poolerErrorCode_index)-1) {
+		return "poolerErrorCode(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
 	return _poolerErrorCode_name[_poolerErrorCode_index[i]:_poolerErrorCode_index[i+1]]
 }
