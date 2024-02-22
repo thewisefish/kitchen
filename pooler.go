@@ -7,11 +7,11 @@ import (
 	"sync/atomic"
 )
 
-//go:generate $GOPATH/bin/stringer -type=poolerError -linecomment -output pooler_generated.go
-type poolerError int
+//go:generate $GOPATH/bin/stringer -type=poolerErrorCode -linecomment -output pooler_generated.go
+type poolerErrorCode int
 
 const (
-	nilPoolable         poolerError = iota // nil Poolable
+	nilPoolable         poolerErrorCode = iota // nil Poolable
 	nilCreatorFunc                         // nil New function passed to CreatePooler
 	nilAfterGetFunc                        // nil AfterGet function passed to CreatePooler
 	nilPoolerToRecycler                    // nil Pooler passed to CreateRecycler
@@ -20,7 +20,17 @@ const (
 	initpoolerError                        // error creating Recycler
 )
 
-func (e poolerError) Error() error { return errors.New(e.String()) }
+func (e poolerErrorCode) Error() error { return errors.New(e.String()) }
+
+var (
+	NilPoolable  = nilPoolable.Error()
+	NilCreatorFunc  = nilCreatorFunc.Error()
+	NilAfterGetFunc  = nilAfterGetFunc.Error()
+	NilPoolerToRecycler = nilPoolerToRecycler.Error()
+	PoolerDisabled = poolerDisabled.Error()
+	RecyclerDisabled = recyclerDisabled.Error()
+	InitPoolerError = initpoolerError.Error()
+)
 func AfterGetNoop[T any](x T) T    { return x }
 
 /*
@@ -47,15 +57,15 @@ type Poolable[T any] struct {
 // Returns an error corresponding to any issues found, or nil if there are no issues
 func (r *Poolable[T]) Validate() error {
 	if r == nil {
-		return nilPoolable.Error()
+		return NilPoolable
 	}
 	r.RLock()
 	defer r.RUnlock()
 	if r.New == nil {
-		return nilCreatorFunc.Error()
+		return NilCreatorFunc
 	}
 	if r.AfterGet == nil {
-		return nilAfterGetFunc.Error()
+		return NilAfterGetFunc
 	}
 	return nil
 }
@@ -65,10 +75,10 @@ CreatePool[T] and Poolable[T].CreatePool create a Pooler from a collection of fu
 */
 func CreatePool[T any](New func() T, afterGet func(T) T, beforePut func(T), size int) (Pooler[T], error) {
 	if New == nil {
-		return nil, nilCreatorFunc.Error()
+		return nil, NilCreatorFunc
 	}
 	if afterGet == nil {
-		return nil, nilAfterGetFunc.Error()
+		return nil, NilAfterGetFunc
 	}
 	var dump chan *T
 	if size > 0 {
@@ -102,7 +112,7 @@ func CreatePool[T any](New func() T, afterGet func(T) T, beforePut func(T), size
 
 func (r *Poolable[T]) CreatePool() (Pooler[T], error) {
 	if r == nil {
-		return nil, nilPoolable.Error()
+		return nil, NilPoolable
 	}
 	r.RLock()
 	defer r.RUnlock()
@@ -304,7 +314,7 @@ type Recycler[T any] interface {
 
 func initRecycler[V *recyclable[T], T any](r Pooler[T]) (Recycler[T], error) {
 	if r == nil {
-		return nil, nilPoolerToRecycler.Error()
+		return nil, NilPoolerToRecycler
 	}
 	maker := makeRecyclable[T]
 	bp := func(x *recyclable[T]) {
@@ -330,7 +340,7 @@ func initRecycler[V *recyclable[T], T any](r Pooler[T]) (Recycler[T], error) {
 	//rp.source().reference.Unlock()
 	rv := &recyclingPlant[*recyclable[T], T]{pool: r, wrapper: rp}
 	if !r.enabled() { //check last to minimize ABA problem shenanigans -- return recyclingPlant at this point since the recycler will get Destroy()'d anyway
-		err = recyclerDisabled.Error()
+		err = RecyclerDisabled
 	}
 	return rv, err
 }

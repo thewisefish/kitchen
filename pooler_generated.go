@@ -17,13 +17,13 @@ func _() {
 	_ = x[initpoolerError-6]
 }
 
-const _poolerError_name = "nil Poolablenil New function passed to CreatePoolernil AfterGet function passed to CreatePoolernil Pooler passed to CreateRecyclerPooler disabledRecycler disablederror creating Recycler"
+const _poolerErrorCode_name = "nil Poolablenil New function passed to CreatePoolernil AfterGet function passed to CreatePoolernil Pooler passed to CreateRecyclerPooler disabledRecycler disablederror creating Recycler"
 
-var _poolerError_index = [...]uint8{0, 12, 51, 95, 130, 145, 162, 185}
+var _poolerErrorCode_index = [...]uint8{0, 12, 51, 95, 130, 145, 162, 185}
 
 func (i poolerError) String() string {
-	if i < 0 || i >= poolerError(len(_poolerError_index)-1) {
+	if i < 0 || i >= poolerError(len(_poolerErrorCode_index)-1) {
 		return "poolerError(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
-	return _poolerError_name[_poolerError_index[i]:_poolerError_index[i+1]]
+	return _poolerErrorCode_name[_poolerErrorCode_index[i]:_poolerErrorCode_index[i+1]]
 }
