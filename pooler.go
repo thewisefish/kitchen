@@ -1,7 +1,6 @@
 package kitchen
 
 import (
-	"errors"
 	"runtime"
 	"sync"
 	"sync/atomic"
