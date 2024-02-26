@@ -8,13 +8,13 @@ func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
-	_ = x[nilPoolable-0]
-	_ = x[nilCreatorFunc-1]
-	_ = x[nilAfterGetFunc-2]
-	_ = x[nilPoolerToRecycler-3]
-	_ = x[poolerDisabled-4]
-	_ = x[recyclerDisabled-5]
-	_ = x[initpoolerError-6]
+	_ = x[NilPoolable-0]
+	_ = x[NilCreatorFunc-1]
+	_ = x[NilAfterGetFunc-2]
+	_ = x[NilPoolerToRecycler-3]
+	_ = x[PoolerDisabled-4]
+	_ = x[RecyclerDisabled-5]
+	_ = x[InitPoolerError-6]
 }
 
 const _poolerErrorCode_name = "nil Poolablenil New function passed to CreatePoolernil AfterGet function passed to CreatePoolernil Pooler passed to CreateRecyclerPooler disabledRecycler disablederror creating Recycler"

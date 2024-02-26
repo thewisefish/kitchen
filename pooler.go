@@ -10,27 +10,19 @@ import (
 //go:generate $GOPATH/bin/stringer -type=poolerErrorCode -linecomment -output pooler_generated.go
 type poolerErrorCode int
 
+func (e poolerErrorCode) Error() string { return e.String() }
+
 const (
-	nilPoolable         poolerErrorCode = iota // nil Poolable
-	nilCreatorFunc                         // nil New function passed to CreatePooler
-	nilAfterGetFunc                        // nil AfterGet function passed to CreatePooler
-	nilPoolerToRecycler                    // nil Pooler passed to CreateRecycler
-	poolerDisabled                         // Pooler disabled
-	recyclerDisabled                       // Recycler disabled
-	initpoolerError                        // error creating Recycler
+	NilPoolable         poolerErrorCode = iota // nil Poolable
+	NilCreatorFunc                         // nil New function passed to CreatePooler
+	NilAfterGetFunc                        // nil AfterGet function passed to CreatePooler
+	NilPoolerToRecycler                    // nil Pooler passed to CreateRecycler
+	PoolerDisabled                         // Pooler disabled
+	RecyclerDisabled                       // Recycler disabled
+	InitPoolerError                        // error creating Recycler
 )
 
-func (e poolerErrorCode) Error() error { return errors.New(e.String()) }
 
-var (
-	NilPoolable  = nilPoolable.Error()
-	NilCreatorFunc  = nilCreatorFunc.Error()
-	NilAfterGetFunc  = nilAfterGetFunc.Error()
-	NilPoolerToRecycler = nilPoolerToRecycler.Error()
-	PoolerDisabled = poolerDisabled.Error()
-	RecyclerDisabled = recyclerDisabled.Error()
-	InitPoolerError = initpoolerError.Error()
-)
 func AfterGetNoop[T any](x T) T    { return x }
 
 /*
